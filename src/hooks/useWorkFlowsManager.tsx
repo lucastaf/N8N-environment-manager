@@ -1,4 +1,7 @@
 import { createContext, ReactNode, useContext } from "react";
+import { BaseDirectory, create, readFile } from "@tauri-apps/plugin-fs";
+import { useSelectedPath } from "./useSelectedPath";
+import * as path from "@tauri-apps/api/path";
 
 type workFlowsManagerType = {
   addWorkFlow(path: string): void;
@@ -13,11 +16,29 @@ export const WorkFlowManagerProvider = ({
 }: {
   children: ReactNode;
 }) => {
+  const selectedPath = useSelectedPath();
   return (
     <WorkFlowManagerContext.Provider
       value={{
-        addWorkFlow(path) {
-          console.log(path);
+        async addWorkFlow(workflowFilePath: string) {
+          const content = await readFile(workflowFilePath);
+          const decodedContent = new TextDecoder().decode(content);
+          console.log(decodedContent);
+          if (selectedPath.selectedPath) {
+            const jsonBody = JSON.parse(decodedContent);
+            const fileName = jsonBody.name + ".json";
+            const newFilePath = await path.join(
+              selectedPath.selectedPath,
+              "nodes",
+              fileName
+            );
+
+            console.log(newFilePath);
+            const newFile = await create(newFilePath);
+
+            await newFile.write(content);
+            await newFile.close();
+          }
         },
       }}
     >
