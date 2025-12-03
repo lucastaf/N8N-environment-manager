@@ -9,10 +9,21 @@
 
     "fs:default",
     "fs:read-all",
-    "fs:write-all",
-    "fs:allow-create"
-  ],
-  "scopes": {
-    "fs": ["**"]
-  }
+    {
+      "identifier": "fs:allow-create",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:write-all",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
+    }
+  ]
 }

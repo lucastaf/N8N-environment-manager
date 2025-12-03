@@ -13,12 +13,16 @@ export function Header() {
       <div>
         <Button
           onClick={async () => {
-            const file = await open({
+            const path = await open({
               multiple: false,
               directory: true,
+              canCreateDirectories: false,
             });
-            if (file != null) {
-              selectedPath.setSelectedPath(file);
+
+            const correctedPath = path?.replace(/\\/g, "/");
+
+            if (correctedPath != null) {
+              selectedPath.setSelectedPath(correctedPath);
             }
           }}
         >
