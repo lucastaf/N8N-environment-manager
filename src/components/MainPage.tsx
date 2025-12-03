@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import WorkflowsTab from "./pages/Workflows";
+import EnviromentsTab from "./pages/Enviroments";
 
 export default function MainPage() {
   return (
@@ -12,7 +13,9 @@ export default function MainPage() {
         <TabsContent value="workflows">
           <WorkflowsTab />
         </TabsContent>
-        <TabsContent value="enviroments">Enviroments</TabsContent>
+        <TabsContent value="enviroments">
+          <EnviromentsTab />
+        </TabsContent>
       </Tabs>
     </div>
   );

@@ -33,7 +33,6 @@ function GlobalFileAdder() {
     };
   }, []);
 
-  console.log(isHoverActive);
   if (isHoverActive)
     return (
       <div className="absolute w-full h-full bg-gray-500 opacity-50 flex items-center justify-center">
