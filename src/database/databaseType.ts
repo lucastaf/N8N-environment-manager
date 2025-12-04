@@ -1,4 +1,4 @@
-export type environment = {
+export type environments = {
     id: string,
     name: string
 }
@@ -10,13 +10,13 @@ export type credentials = {
 
 export type environments_credentials = {
     id: string,
-    id_environment: number,
-    id_credential: number,
+    id_environment: string,
+    id_credential: string,
     value: any
 }
 
 export type credentialsDatabaseType = {
-    environments: environment[]
+    environments: environments[]
     credentials: credentials[]
     environments_credentials: environments_credentials[]
 }

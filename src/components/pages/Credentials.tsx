@@ -21,11 +21,11 @@ export default function CredentialsTab() {
   const [newCredentialName, setNewCredentialName] = useState("");
 
   const createEnvironment = () => {
-    manager?.credentialsManager?.createCredential(newCredentialName);
+    manager?.credentialsManager?.create(newCredentialName);
   };
 
   const deleteCredential = (envId: string) => {
-    manager?.credentialsManager?.deleteCredentialById(envId);
+    manager?.credentialsManager?.deleteById(envId);
   };
 
   return (

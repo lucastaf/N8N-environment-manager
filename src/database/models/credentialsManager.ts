@@ -1,23 +1,23 @@
 import { Low } from "lowdb";
 import { credentialsDatabaseType, onDatabaseUpdate } from "../databaseType";
 
-export class EnviromentsManager {
+export class CredentialsManager {
     public constructor(private db: Low<credentialsDatabaseType>, private onUpdate: onDatabaseUpdate) { }
 
-    public async createEnviroment(enviromentName: string) {
+    public async create(credentialName: string) {
         await this.db.read();
-        await this.db?.update(({ environments: enviroments }) => enviroments.push({
+        await this.db?.update(({ credentials }) => credentials.push({
             id: crypto.randomUUID(),
-            name: enviromentName
+            name: credentialName
         }))
         await this.onUpdate(this.db.data);
     }
 
-    public async deleteEnvById(enviromentId: string) {
+    public async deleteById(credentialId: string) {
         await this.db.read();
-        const index = this.db.data.environments.findIndex(item => item.id == enviromentId);
+        const index = this.db.data.credentials.findIndex(item => item.id == credentialId);
         if (index != -1) {
-            this.db.data.environments.splice(index, 1);
+            this.db.data.credentials.splice(index, 1);
         } else {
             throw new Error("ID não encontrado");
         }
