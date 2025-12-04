@@ -1,8 +1,9 @@
 import { create, mkdir } from "@tauri-apps/plugin-fs";
 import toast from "react-hot-toast";
-import { credentialsDatabaseType } from "./databaseType";
+import { credentialsDatabaseType, onDatabaseUpdate } from "./databaseType";
 import { TauriAdapter } from "./tauriLowDbAdapter";
 import { Low } from "lowdb";
+import { EnviromentsManager } from "./models/enviromentsManager";
 
 type N8NCredential = Record<string, { id: string; name: string }>;
 
@@ -19,19 +20,23 @@ const emptyDatabase: credentialsDatabaseType = {
 
 //Com as credenciais, faz a substituição
 
-export class WorkFlowManager {
-    private db: Low<credentialsDatabaseType> | null = null;
-    public constructor(private selectedPath: string) {
-    }
+export class databaseManager {
+    private db: Low<credentialsDatabaseType>;
+    public readonly enviromentManager: EnviromentsManager;
 
-    private async loadDatabase() {
-        if (this.db !== null) return;
+    public constructor(private selectedPath: string, private onUpdate: onDatabaseUpdate) {
         const adapter = new TauriAdapter(this.selectedPath + '/db.json', emptyDatabase);
         this.db = new Low(adapter, emptyDatabase);
+        this.enviromentManager = new EnviromentsManager(this.db, this.onUpdate);
+    }
+
+    public async load() {
+        await this.db.read();
+        this.onUpdate(this.db.data);
     }
 
     public async addWorkFlow(workflowJSON: any) {
-        await this.loadDatabase();
+        await this.db.read();
         const newJsonContent = this.replaceCredentials(workflowJSON);
 
         const workFlowString = JSON.stringify(newJsonContent);
@@ -49,22 +54,9 @@ export class WorkFlowManager {
         await newFile.write(content);
         await newFile.close();
 
+        this.onUpdate(this.db.data);
+
     }
-
-    public async getDB() {
-        await this.loadDatabase();
-        return this.db!;
-    }
-
-    public async createEnviroment(enviromentName: string) {
-        await this.loadDatabase();
-        await this.db?.update(({ enviroments }) => enviroments.push({
-            id: crypto.randomUUID(),
-            name: enviromentName
-        }))
-    }
-
-
 
     private replaceCredentials(json: any) {
         try {

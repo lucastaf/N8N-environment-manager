@@ -1,6 +1,10 @@
-import { useEffect, useState } from "react";
+import { useWorkFlowManager } from "@/hooks/useWorkFlowsManager";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader } from "../ui/card";
+import { Dialog, DialogContent, DialogHeader } from "../ui/dialog";
+import { Input } from "../ui/input";
 import {
   Table,
   TableBody,
@@ -9,38 +13,31 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { Dialog, DialogContent, DialogHeader } from "../ui/dialog";
-import { Input } from "../ui/input";
-import { useWorkFlowManager } from "@/hooks/useWorkFlowsManager";
-import { enviroment } from "../database/databaseType";
 
 export default function EnviromentsTab() {
-  const workFlowManager = useWorkFlowManager();
+  const { manager, database } = useWorkFlowManager();
 
   const [openAddEnv, setOpenaddEnv] = useState(false);
   const [newEnvName, setNewEnvName] = useState("");
 
-  const [enviromentsList, setEnviromentsList] = useState<enviroment[]>();
-
-  useEffect(() => {
-    workFlowManager?.manager?.getDB().then((res) => {
-      setEnviromentsList(res.data.enviroments);
-    });
-  }, [workFlowManager]);
-
-  const createEnvironment = async () => {
-    await workFlowManager?.manager?.createEnviroment(newEnvName);
+  const createEnvironment = () => {
+    manager?.enviromentManager?.createEnviroment(newEnvName);
   };
+
+  const deleteEnv = (envId: string) => {
+    manager?.enviromentManager?.deleteEnvById(envId);
+  };
+
   return (
     <>
       <Dialog onOpenChange={setOpenaddEnv} open={openAddEnv}>
-        <DialogHeader>Insert environment name</DialogHeader>
         <DialogContent>
+          <DialogHeader>Insert environment name</DialogHeader>
           <Input
             value={newEnvName}
             onChange={(e) => setNewEnvName(e.target.value)}
           />
-          <Button onClick={createEnvironment} />
+          <Button onClick={createEnvironment}> ADD Environment </Button>
         </DialogContent>
       </Dialog>
       <Card>
@@ -54,13 +51,22 @@ export default function EnviromentsTab() {
           <Table>
             <TableHeader>
               <TableHead>ID</TableHead>
-              <TableHead>Nome</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Action</TableHead>
             </TableHeader>
             <TableBody>
-              {enviromentsList?.map((item) => (
+              {database?.enviroments.map((item) => (
                 <TableRow>
                   <TableCell>{item.id}</TableCell>
                   <TableCell>{item.name}</TableCell>
+                  <TableCell>
+                    <Button
+                      onClick={() => deleteEnv(item.id)}
+                      variant={"destructive"}
+                    >
+                      <Trash2 />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

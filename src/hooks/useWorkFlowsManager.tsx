@@ -1,4 +1,4 @@
-import { WorkFlowManager } from "@/components/database/workFlowsManager";
+import { databaseManager } from "@/components/database/workFlowsManager";
 import {
   createContext,
   ReactNode,
@@ -9,10 +9,12 @@ import {
 } from "react";
 import { useSelectedPath } from "./useSelectedPath";
 import { readFile } from "@tauri-apps/plugin-fs";
+import { credentialsDatabaseType } from "@/components/database/databaseType";
 
 type workFlowsManagerType = {
-  manager: WorkFlowManager | undefined;
-  addWorkFlow: (path: string) => void;
+  manager: databaseManager | undefined;
+  database: credentialsDatabaseType | undefined;
+  addWorkFlowFromFilePath: (path: string) => void;
 };
 const WorkFlowManagerContext = createContext<workFlowsManagerType | undefined>(
   undefined
@@ -24,21 +26,25 @@ export const WorkFlowManagerProvider = ({
   children: ReactNode;
 }) => {
   const { selectedPath } = useSelectedPath();
-  const [manager, setManger] = useState<WorkFlowManager>();
+  const [manager, setManger] = useState<databaseManager>();
+  const [databaseData, setDataBaseData] = useState<credentialsDatabaseType>();
   useEffect(() => {
     if (selectedPath) {
-      setManger(new WorkFlowManager(selectedPath));
+      const newManager = new databaseManager(selectedPath, (newDatabase) => {
+        setDataBaseData(newDatabase);
+      });
+      setManger(newManager);
+      newManager.load();
     }
   }, [selectedPath]);
 
-  const addWorkflow = useCallback(
+  const addWorkflowFromFilePath = useCallback(
     async (workflowFilePath: string) => {
       const content = await readFile(workflowFilePath);
       const decodedContent = new TextDecoder().decode(content);
       if (selectedPath) {
-        const workFlowManager = new WorkFlowManager(selectedPath);
         const jsonBody = JSON.parse(decodedContent);
-        workFlowManager.addWorkFlow(jsonBody);
+        manager?.addWorkFlow(jsonBody);
       }
     },
     [selectedPath]
@@ -47,7 +53,8 @@ export const WorkFlowManagerProvider = ({
     <WorkFlowManagerContext.Provider
       value={{
         manager: manager,
-        addWorkFlow: addWorkflow,
+        addWorkFlowFromFilePath: addWorkflowFromFilePath,
+        database: databaseData,
       }}
     >
       {children}
@@ -55,4 +62,12 @@ export const WorkFlowManagerProvider = ({
   );
 };
 
-export const useWorkFlowManager = () => useContext(WorkFlowManagerContext);
+export const useWorkFlowManager = () => {
+  const ctx = useContext(WorkFlowManagerContext);
+  if (!ctx) {
+    throw new Error(
+      "useWorkFlowManager must be used within a WorkFlowManagerProvider"
+    );
+  }
+  return ctx;
+};

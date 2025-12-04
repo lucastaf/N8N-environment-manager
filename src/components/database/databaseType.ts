@@ -20,3 +20,5 @@ export type credentialsDatabaseType = {
     connections: connections[]
     credentials_instances: credentials_instances[]
 }
+
+export type onDatabaseUpdate = (newDatabase: credentialsDatabaseType) => void

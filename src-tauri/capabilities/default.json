@@ -8,7 +8,14 @@
     "dialog:default",
 
     "fs:default",
-    "fs:read-all",
+    {
+      "identifier": "fs:read-all",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
+    },
     {
       "identifier": "fs:allow-create",
       "allow": [
