@@ -8,16 +8,12 @@ export type mergedEnvironmentsCredentials = Array<
     }>
 
 export class EnvironmentCredentialManager {
-    public constructor(private db: Low<credentialsDatabaseType>, private onUpdate: onDatabaseUpdate) { }
+    public constructor(private db: Low<credentialsDatabaseType>, private onUpdate: onDatabaseUpdate) {
+    }
 
-    public async create(id: string, envId: string, credentialId: string, value: any) {
+    public async create(data: environments_credentials) {
         await this.db.read();
-        await this.db?.update(({ environments_credentials }) => environments_credentials.push({
-            id: id,
-            id_credential: credentialId,
-            id_environment: envId,
-            value: value
-        }))
+        await this.db.update(({ environments_credentials }) => environments_credentials.push(data))
         await this.onUpdate(this.db.data);
     }
 
@@ -32,6 +28,16 @@ export class EnvironmentCredentialManager {
 
         await this.db.write();
         await this.onUpdate(this.db.data);
+    }
+
+    public async getList() {
+        await this.db.read();
+        return this.db.data.environments_credentials;
+    }
+
+    public async getItemById(id: string) {
+        await this.db.read();
+        return this.db.data.environments_credentials.find(item => item.id == id);
     }
 
     public async getMergedList() {

@@ -12,6 +12,7 @@ export type environments_credentials = {
     id: string,
     id_environment: string,
     id_credential: string,
+    name: string,
     value: any
 }
 

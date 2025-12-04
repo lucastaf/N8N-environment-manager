@@ -1,5 +1,5 @@
 import { mergedEnvironmentsCredentials } from "@/lib/database/models/environmentCredentialsManager";
-import { useWorkFlowManager } from "@/hooks/useWorkFlowsManager";
+import { useDatabaseManager } from "@/hooks/useDatabaseManager";
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
@@ -14,7 +14,7 @@ import {
 } from "../ui/table";
 
 export default function EnviromentsCredentialsTab() {
-  const { manager, database } = useWorkFlowManager();
+  const { manager, database } = useDatabaseManager();
 
   const [mergedCredentials, setMergedCredentials] =
     useState<mergedEnvironmentsCredentials>();
