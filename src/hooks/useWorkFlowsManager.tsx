@@ -1,10 +1,18 @@
-import { WorkFlowManager } from "@/components/services/workFlowsManager";
-import { readFile } from "@tauri-apps/plugin-fs";
-import { createContext, ReactNode, useCallback, useContext } from "react";
+import { WorkFlowManager } from "@/components/database/workFlowsManager";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useSelectedPath } from "./useSelectedPath";
+import { readFile } from "@tauri-apps/plugin-fs";
 
 type workFlowsManagerType = {
-  addWorkFlow(path: string): void;
+  manager: WorkFlowManager | undefined;
+  addWorkFlow: (path: string) => void;
 };
 const WorkFlowManagerContext = createContext<workFlowsManagerType | undefined>(
   undefined
@@ -16,6 +24,12 @@ export const WorkFlowManagerProvider = ({
   children: ReactNode;
 }) => {
   const { selectedPath } = useSelectedPath();
+  const [manager, setManger] = useState<WorkFlowManager>();
+  useEffect(() => {
+    if (selectedPath) {
+      setManger(new WorkFlowManager(selectedPath));
+    }
+  }, [selectedPath]);
 
   const addWorkflow = useCallback(
     async (workflowFilePath: string) => {
@@ -29,10 +43,10 @@ export const WorkFlowManagerProvider = ({
     },
     [selectedPath]
   );
-
   return (
     <WorkFlowManagerContext.Provider
       value={{
+        manager: manager,
         addWorkFlow: addWorkflow,
       }}
     >

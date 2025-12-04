@@ -1,14 +1,14 @@
-type enviroment = {
-    id: number,
+export type enviroment = {
+    id: string,
     name: string
 }
 
-type connections = {
-    id: number,
+export type connections = {
+    id: string,
     name: string
 }
 
-type credentials_instances = {
+export type credentials_instances = {
     id: string,
     id_enviroment: number,
     id_connection: number,

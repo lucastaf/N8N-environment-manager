@@ -16,7 +16,7 @@ function GlobalFileAdder() {
           setIsHoverActive(true);
         } else if (event.payload.type === "drop") {
           setIsHoverActive(false);
-          workflowManager?.addWorkFlow(event.payload.paths[0]);
+          workflowManager?.manager?.addWorkFlow(event.payload.paths[0]);
         } else {
           setIsHoverActive(false);
         }

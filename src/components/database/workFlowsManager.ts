@@ -12,20 +12,26 @@ const emptyDatabase: credentialsDatabaseType = {
     connections: [],
     credentials_instances: []
 }
+//Le as credenciais do workflow
+//Procura se as credenciais estão cadastradas no banco
+//Se nao tiver, pede pro usuario cadastrar
+//Se tiver, pula
+
+//Com as credenciais, faz a substituição
 
 export class WorkFlowManager {
+    private db: Low<credentialsDatabaseType> | null = null;
     public constructor(private selectedPath: string) {
     }
 
-    public async addWorkFlow(workflowJSON: any) {
+    private async loadDatabase() {
+        if (this.db !== null) return;
         const adapter = new TauriAdapter(this.selectedPath + '/db.json', emptyDatabase);
-        const db = new Low(adapter, emptyDatabase);
-        db.data.enviroments.push({
-            id: 1,
-            name: "AA"
-        });
+        this.db = new Low(adapter, emptyDatabase);
+    }
 
-        await db.write();
+    public async addWorkFlow(workflowJSON: any) {
+        await this.loadDatabase();
         const newJsonContent = this.replaceCredentials(workflowJSON);
 
         const workFlowString = JSON.stringify(newJsonContent);
@@ -45,6 +51,21 @@ export class WorkFlowManager {
 
     }
 
+    public async getDB() {
+        await this.loadDatabase();
+        return this.db!;
+    }
+
+    public async createEnviroment(enviromentName: string) {
+        await this.loadDatabase();
+        await this.db?.update(({ enviroments }) => enviroments.push({
+            id: crypto.randomUUID(),
+            name: enviromentName
+        }))
+    }
+
+
+
     private replaceCredentials(json: any) {
         try {
             const credentials: N8NCredential[] = json.nodes
@@ -58,6 +79,7 @@ export class WorkFlowManager {
                 });
             });
             console.log(findedCredentials);
+            return json;
         } catch (e) {
             console.error(e);
             toast.error("Erro ao parsear json");
