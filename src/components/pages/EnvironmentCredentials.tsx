@@ -1,6 +1,7 @@
+import { mergedEnvironmentsCredentials } from "@/lib/database/models/environmentCredentialsManager";
 import { useWorkFlowManager } from "@/hooks/useWorkFlowsManager";
 import { Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import {
@@ -11,7 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { mergedEnvironmentsCredentials } from "@/database/models/environmentCredentialsManager";
 
 export default function EnviromentsCredentialsTab() {
   const { manager, database } = useWorkFlowManager();
@@ -23,7 +23,11 @@ export default function EnviromentsCredentialsTab() {
     manager?.environmentCredentialMangaer.getMergedList().then((res) => {
       setMergedCredentials(res);
     });
-  });
+  }, [database]);
+
+  const deleteEnvironmentCredential = (credentialId: string) => {
+    manager?.environmentCredentialMangaer.deleteById(credentialId);
+  };
 
   return (
     <>
@@ -51,7 +55,7 @@ export default function EnviromentsCredentialsTab() {
                   <TableCell>{item.environment?.name}</TableCell>
                   <TableCell>
                     <Button
-                      // onClick={() => deleteEnv(item.id)}
+                      onClick={() => deleteEnvironmentCredential(item.id)}
                       variant={"destructive"}
                     >
                       <Trash2 />

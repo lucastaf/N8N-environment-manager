@@ -1,4 +1,4 @@
-import { DatabaseManager } from "@/database/workFlowsManager";
+import { DatabaseManager } from "@/lib/database/databaseManager";
 import {
   createContext,
   ReactNode,
@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useSelectedPath } from "./useSelectedPath";
 import { readFile } from "@tauri-apps/plugin-fs";
-import { credentialsDatabaseType } from "@/database/databaseType";
+import { credentialsDatabaseType } from "@/lib/database/databaseType";
 
 type workFlowsManagerType = {
   manager: DatabaseManager | undefined;
