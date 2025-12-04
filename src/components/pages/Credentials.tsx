@@ -14,29 +14,29 @@ import {
   TableRow,
 } from "../ui/table";
 
-export default function EnviromentsTab() {
+export default function CredentialsTab() {
   const { manager, database } = useWorkFlowManager();
 
-  const [openAddEnv, setOpenaddEnv] = useState(false);
-  const [newEnvName, setNewEnvName] = useState("");
+  const [openAddCredential, setOpenaddCredential] = useState(false);
+  const [newCredentialName, setNewCredentialName] = useState("");
 
   const createEnvironment = () => {
-    manager?.enviromentManager?.createEnviroment(newEnvName);
+    manager?.credentialsManager?.createCredential(newCredentialName);
   };
 
-  const deleteEnv = (envId: string) => {
-    manager?.enviromentManager?.deleteEnvById(envId);
+  const deleteCredential = (envId: string) => {
+    manager?.credentialsManager?.deleteCredentialById(envId);
   };
 
   return (
     <>
-      <Dialog onOpenChange={setOpenaddEnv} open={openAddEnv}>
+      <Dialog onOpenChange={setOpenaddCredential} open={openAddCredential}>
         <DialogContent>
-          <DialogHeader>Insert environment name</DialogHeader>
+          <DialogHeader>Insert credential name</DialogHeader>
           <Input
-            placeholder="DEV"
-            value={newEnvName}
-            onChange={(e) => setNewEnvName(e.target.value)}
+            placeholder="MySql Connection"
+            value={newCredentialName}
+            onChange={(e) => setNewCredentialName(e.target.value)}
           />
           <Button onClick={createEnvironment}> ADD Environment </Button>
         </DialogContent>
@@ -44,8 +44,10 @@ export default function EnviromentsTab() {
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <div>Enviroments</div>
-            <Button onClick={() => setOpenaddEnv(true)}>Add Enviroment</Button>
+            <div>Credentials</div>
+            <Button onClick={() => setOpenaddCredential(true)}>
+              Add Enviroment
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -58,13 +60,13 @@ export default function EnviromentsTab() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {database?.environments?.map((item) => (
+              {database?.credentials.map((item) => (
                 <TableRow>
                   <TableCell>{item.id}</TableCell>
                   <TableCell>{item.name}</TableCell>
                   <TableCell>
                     <Button
-                      onClick={() => deleteEnv(item.id)}
+                      onClick={() => deleteCredential(item.id)}
                       variant={"destructive"}
                     >
                       <Trash2 />

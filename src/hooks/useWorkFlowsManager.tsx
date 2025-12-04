@@ -1,4 +1,4 @@
-import { databaseManager } from "@/components/database/workFlowsManager";
+import { DatabaseManager } from "@/components/database/workFlowsManager";
 import {
   createContext,
   ReactNode,
@@ -12,7 +12,7 @@ import { readFile } from "@tauri-apps/plugin-fs";
 import { credentialsDatabaseType } from "@/components/database/databaseType";
 
 type workFlowsManagerType = {
-  manager: databaseManager | undefined;
+  manager: DatabaseManager | undefined;
   database: credentialsDatabaseType | undefined;
   addWorkFlowFromFilePath: (path: string) => void;
 };
@@ -26,11 +26,11 @@ export const WorkFlowManagerProvider = ({
   children: ReactNode;
 }) => {
   const { selectedPath } = useSelectedPath();
-  const [manager, setManger] = useState<databaseManager>();
+  const [manager, setManger] = useState<DatabaseManager>();
   const [databaseData, setDataBaseData] = useState<credentialsDatabaseType>();
   useEffect(() => {
     if (selectedPath) {
-      const newManager = new databaseManager(selectedPath, (newDatabase) => {
+      const newManager = new DatabaseManager(selectedPath, (newDatabase) => {
         setDataBaseData(newDatabase);
       });
       setManger(newManager);

@@ -1,24 +1,24 @@
-export type enviroment = {
+export type environment = {
     id: string,
     name: string
 }
 
-export type connections = {
+export type credentials = {
     id: string,
     name: string
 }
 
-export type credentials_instances = {
+export type environments_credentials = {
     id: string,
-    id_enviroment: number,
-    id_connection: number,
+    id_environment: number,
+    id_credential: number,
     value: any
 }
 
 export type credentialsDatabaseType = {
-    enviroments: enviroment[]
-    connections: connections[]
-    credentials_instances: credentials_instances[]
+    environments: environment[]
+    credentials: credentials[]
+    environments_credentials: environments_credentials[]
 }
 
 export type onDatabaseUpdate = (newDatabase: credentialsDatabaseType) => void

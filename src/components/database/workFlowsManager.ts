@@ -4,14 +4,15 @@ import { credentialsDatabaseType, onDatabaseUpdate } from "./databaseType";
 import { TauriAdapter } from "./tauriLowDbAdapter";
 import { Low } from "lowdb";
 import { EnviromentsManager } from "./models/enviromentsManager";
+import { CredentialsManager } from "./models/credentialsManager";
 
 type N8NCredential = Record<string, { id: string; name: string }>;
 
 
 const emptyDatabase: credentialsDatabaseType = {
-    enviroments: [],
-    connections: [],
-    credentials_instances: []
+    environments: [],
+    credentials: [],
+    environments_credentials: []
 }
 //Le as credenciais do workflow
 //Procura se as credenciais estão cadastradas no banco
@@ -20,14 +21,16 @@ const emptyDatabase: credentialsDatabaseType = {
 
 //Com as credenciais, faz a substituição
 
-export class databaseManager {
+export class DatabaseManager {
     private db: Low<credentialsDatabaseType>;
     public readonly enviromentManager: EnviromentsManager;
+    public readonly credentialsManager: CredentialsManager;
 
     public constructor(private selectedPath: string, private onUpdate: onDatabaseUpdate) {
         const adapter = new TauriAdapter(this.selectedPath + '/db.json', emptyDatabase);
         this.db = new Low(adapter, emptyDatabase);
         this.enviromentManager = new EnviromentsManager(this.db, this.onUpdate);
+        this.credentialsManager = new CredentialsManager(this.db, this.onUpdate)
     }
 
     public async load() {
