@@ -63,6 +63,7 @@ export const DatabaseManagerProvider = ({
         open={openAddMissingCredentialsDialog}
         setOpen={setOpenMissingCredentialsDialog}
         credentials={missingCredentials}
+        database={databaseData!}
       />
       {children}
     </DatabaseManagerContext.Provider>
