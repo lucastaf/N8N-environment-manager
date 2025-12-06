@@ -31,7 +31,7 @@ function WorkflowsTab() {
     workFlowManager?.listFiles().then((res) => {
       setWorkFlowFiles(res);
     });
-  });
+  }, []);
 
   return (
     <div>

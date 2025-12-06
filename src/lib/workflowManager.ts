@@ -38,10 +38,10 @@ export class WorkflowManager {
             toast.success("File added successfully");
         } catch (e: unknown) {
             if (!(e instanceof CredentialNotFoundError)) {
-                this.addNewCredentialsEvent((e as CredentialNotFoundError).credentials);
                 toast.error("Error when uploading file");
+                console.error(e);
             }
-            console.error(e);
+            this.addNewCredentialsEvent((e as CredentialNotFoundError).credentials);
         }
     }
 
