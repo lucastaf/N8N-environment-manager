@@ -35,8 +35,7 @@ export class EnvironmentCredentialManager {
         return this.db.data.environments_credentials;
     }
 
-    public async getItemById(id: string) {
-        await this.db.read();
+    public getById(id: string) {
         return this.db.data.environments_credentials.find(item => item.id == id);
     }
 

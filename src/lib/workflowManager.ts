@@ -11,13 +11,16 @@ export type N8NFindedCredential =
         value: any
     };
 export class WorkflowManager {
+    private lastFilePath: string | undefined;
     public constructor(private databaseManager: DatabaseManager,
         private selectedPath: string,
         private addNewCredentialsEvent: (findedCredentials: N8NFindedCredential[]) => void
     ) { }
 
     public async addWorkFlowFromFile(workflowFilePath: string) {
+        this.lastFilePath = workflowFilePath;
         try {
+
             const content = await readFile(workflowFilePath);
             const decodedContent = new TextDecoder().decode(content);
             const jsonBody = JSON.parse(decodedContent);
@@ -26,6 +29,13 @@ export class WorkflowManager {
             console.error(e);
         }
     }
+
+    public async retryWorkFlowAdd() {
+        if (!this.lastFilePath) throw new Error("No file added");
+        await this.addWorkFlowFromFile(this.lastFilePath);
+    }
+
+
 
     private async addWorkFlow(workflowJSON: any) {
         const newJsonContent = await this.replaceCredentials(workflowJSON);
@@ -48,6 +58,7 @@ export class WorkflowManager {
 
     private async replaceCredentials(json: any) {
         try {
+            //Find Credentials
             const credentials: N8NCredential[] = json.nodes
                 .map((item: any) => item.credentials)
                 .filter((item: any) => item !== undefined);
@@ -66,11 +77,10 @@ export class WorkflowManager {
             const uniqueFindedCredentials = findedCredentials.filter((credential, index) =>
                 findedCredentials.findIndex((item) => item.id == credential.id) == index)
 
-            console.log(json)
-            console.log(uniqueFindedCredentials);
+            //Garantuee every credential is on the database
             const notFoundedCredentials: N8NFindedCredential[] = []
             for (const credential of uniqueFindedCredentials) {
-                const item = await this.databaseManager.environmentCredentialMangaer.getItemById(credential.id);
+                const item = await this.databaseManager.environmentCredentialMangaer.getById(credential.id);
                 if (!item) {
                     notFoundedCredentials.push(credential);
                     console.warn("Credencial não cadastrada:" + credential.id);
@@ -79,10 +89,20 @@ export class WorkflowManager {
             if (notFoundedCredentials.length) {
                 this.addNewCredentialsEvent(notFoundedCredentials);
                 throw new CredentialNotFoundError("Credenciais não encontradas");
-
             }
 
-            return json;
+            const newNodes = json.nodes.map((node: any) => {
+                const originalCredentials: N8NCredential | undefined = node.credentials;
+                if (originalCredentials) {
+                    Object.entries(originalCredentials).map((([key, value]) => {
+                        const replacedCredential = this.databaseManager.environmentCredentialMangaer.getById(value.id);
+                        node.credentials[key] = replacedCredential?.id_credential;
+                    }));
+                }
+                return node;
+            })
+
+            return newNodes;
         } catch (e) {
             if (e instanceof CredentialNotFoundError) throw e;
             console.error(e);

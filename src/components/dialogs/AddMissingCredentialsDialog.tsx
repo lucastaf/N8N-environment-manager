@@ -1,4 +1,3 @@
-import { credentialsDatabaseType } from "@/lib/database/databaseType";
 import { N8NFindedCredential } from "@/lib/workflowManager";
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import {
@@ -16,15 +15,17 @@ import {
   SelectValue,
 } from "../ui/select";
 import { SelectItem } from "@radix-ui/react-select";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { Button } from "../ui/button";
+import { useDatabaseManager } from "@/hooks/useDatabaseManager";
 
 export default function AddMissingCredentialsDialog(props: {
   open: boolean;
   setOpen: (state: boolean) => void;
   credentials: N8NFindedCredential[] | undefined;
-  database: credentialsDatabaseType;
 }) {
-  const { credentials, open, setOpen, database } = props;
+  const { credentials, open, setOpen } = props;
+  const { database, manager, workFlowManager } = useDatabaseManager();
   const [selectedValues, setSelectedValues] = useState<
     Record<
       string,
@@ -34,6 +35,39 @@ export default function AddMissingCredentialsDialog(props: {
       }
     >
   >({});
+
+  const handleAddCredentials = useCallback(() => {
+    Object.entries(selectedValues).forEach(async ([id, selectedValue]) => {
+      if (selectedValue.id_credential && selectedValue.id_environment) {
+        const credential = credentials?.find((item) => item.id == id);
+        if (!credential) return;
+        await manager?.environmentCredentialMangaer.create({
+          id: id,
+          id_credential: selectedValue.id_credential,
+          id_environment: selectedValue.id_environment,
+          name: credential?.name,
+          value: credential?.value,
+        });
+      }
+      setOpen(false);
+      workFlowManager?.retryWorkFlowAdd();
+    });
+  }, [database, selectedValues]);
+
+  const getEnvironmentName = useCallback(
+    (environment_id: string) => {
+      return database?.environments.find((item) => item.id == environment_id)
+        ?.name;
+    },
+    [database]
+  );
+  const getCredentialName = useCallback(
+    (credential_id: string) => {
+      return database?.credentials.find((item) => item.id == credential_id)
+        ?.name;
+    },
+    [database]
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -67,10 +101,14 @@ export default function AddMissingCredentialsDialog(props: {
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue></SelectValue>
+                      <SelectValue>
+                        {getEnvironmentName(
+                          selectedValues[credential.id]?.id_environment
+                        )}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      {database.environments.map((item) => (
+                      {database?.environments.map((item) => (
                         <SelectItem value={item.id}>{item.name}</SelectItem>
                       ))}
                     </SelectContent>
@@ -90,10 +128,14 @@ export default function AddMissingCredentialsDialog(props: {
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue></SelectValue>
+                      <SelectValue>
+                        {getCredentialName(
+                          selectedValues[credential.id]?.id_credential
+                        )}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      {database.credentials.map((item) => (
+                      {database?.credentials.map((item) => (
                         <SelectItem value={item.id}>{item.name}</SelectItem>
                       ))}
                     </SelectContent>
@@ -103,6 +145,7 @@ export default function AddMissingCredentialsDialog(props: {
             ))}
           </TableBody>
         </Table>
+        <Button onClick={handleAddCredentials}>Add Credentials</Button>
       </DialogContent>
     </Dialog>
   );
