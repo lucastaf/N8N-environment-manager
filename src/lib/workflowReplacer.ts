@@ -22,7 +22,8 @@ export class WorkFlowReplacer {
             if (originalCredentials) {
                 Object.entries(originalCredentials).map((([key, value]) => {
                     const replacedCredential = this.databaseManager.environmentCredentialMangaer.getCredentialByEnvironment(value, environmentId);
-                    node.credentials[key] = replacedCredential;
+                    if (!replacedCredential) throw new Error("Credential not found");
+                    node.credentials[key] = replacedCredential?.value;
                 }));
             }
             return node;

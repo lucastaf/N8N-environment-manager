@@ -1,4 +1,4 @@
-import { create, mkdir, readFile } from "@tauri-apps/plugin-fs";
+import { create, mkdir, readDir, readFile } from "@tauri-apps/plugin-fs";
 import { DatabaseManager } from "./database/databaseManager";
 import toast from "react-hot-toast";
 import { CredentialNotFoundError, WorkFlowReplacer } from "./workflowReplacer";
@@ -10,6 +10,13 @@ export type N8NFindedCredential =
         key: string,
         value: any
     };
+
+export type WorkFlowFile = {
+    name: string,
+    id: string,
+    fileName: string,
+    filePath: string
+}
 export class WorkflowManager {
     private lastFilePath: string | undefined;
     private workFlowReplacer: WorkFlowReplacer
@@ -48,6 +55,31 @@ export class WorkflowManager {
             toast.error("Error when downloading file");
             console.error(e);
         }
+    }
+
+    public async listFiles(): Promise<WorkFlowFile[]> {
+        const path = [this.selectedPath, "nodes"].join("/");
+        const files = await readDir(path);
+
+        const results: Array<WorkFlowFile | undefined> = await Promise.all(files.map(async (file) => {
+            if (file.isFile && file.name.endsWith(".json")) {
+                try {
+                    const filePath = path + "/" + file.name
+                    const content = await readFile(filePath);
+                    const decodedContent = new TextDecoder().decode(content);
+                    const fileData = JSON.parse(decodedContent);
+                    return {
+                        id: fileData.id,
+                        name: fileData.name,
+                        fileName: file.name,
+                        filePath: filePath
+                    }
+                } catch (e) {
+                    console.warn("Error when reading jsonFile", e);
+                }
+            }
+        }));
+        return results.filter((item): item is WorkFlowFile => item !== undefined);
     }
 
 
