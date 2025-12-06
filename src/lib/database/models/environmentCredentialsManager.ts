@@ -43,6 +43,10 @@ export class EnvironmentCredentialManager implements EntityManager<environments_
     }
 
 
+    public getCredentialByEnvironment(credentialId: string, environmentId: string) {
+        return this.db.data.environments_credentials.find(item => item.id_credential == credentialId && item.id_environment == environmentId);
+    }
+
 
     public async getMergedList() {
         await this.db.read();
