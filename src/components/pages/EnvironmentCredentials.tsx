@@ -32,11 +32,7 @@ export default function EnviromentsCredentialsTab() {
   return (
     <>
       <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>Enviroments</div>
-          </div>
-        </CardHeader>
+        <CardHeader>Enviroments</CardHeader>
         <CardContent>
           <Table>
             <TableHeader>

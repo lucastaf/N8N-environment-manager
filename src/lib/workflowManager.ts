@@ -1,4 +1,4 @@
-import { create, mkdir, readDir, readFile, writeFile } from "@tauri-apps/plugin-fs";
+import { create, mkdir, readDir, readFile, writeFile, remove } from "@tauri-apps/plugin-fs";
 import { DatabaseManager } from "./database/databaseManager";
 import toast from "react-hot-toast";
 import { CredentialNotFoundError, WorkFlowReplacer } from "./workflowReplacer";
@@ -45,12 +45,12 @@ export class WorkflowManager {
         }
     }
 
-    public async downloadWorkflow(workFlowTemplatePath: string, environmentId: string) {
+    public async downloadWorkflow(workFlowTemplatePath: string, environmentID: string) {
         try {
             const content = await readFile(workFlowTemplatePath);
             const decodedContent = new TextDecoder().decode(content);
             const jsonBody = JSON.parse(decodedContent);
-            const newWorkflow = await this.workFlowReplacer.replaceGenericToCredentials(jsonBody, environmentId);
+            const newWorkflow = await this.workFlowReplacer.replaceGenericToCredentials(jsonBody, environmentID);
             const newWorkFlowString = JSON.stringify(newWorkflow, undefined, 2);
 
             const encoder = new TextEncoder();
@@ -106,6 +106,13 @@ export class WorkflowManager {
         return results.filter((item): item is WorkFlowFile => item !== undefined);
     }
 
+    public async deleteWorkFlow(workflowId: string) {
+        const files = await this.listFiles();
+        const deletedFile = files.find(item => item.id == workflowId);
+        if (deletedFile) {
+            await remove(deletedFile.filePath);
+        }
+    }
 
 
     public async retryWorkFlowAdd() {

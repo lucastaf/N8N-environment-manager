@@ -38,6 +38,7 @@ export default function AddMissingCredentialsDialog(props: {
 
   const handleAddCredentials = useCallback(async () => {
     const selectedValuesEntries = Object.entries(selectedValues);
+    console.log(selectedValuesEntries);
     for (const entry of selectedValuesEntries) {
       const [id, selectedValue] = entry;
 

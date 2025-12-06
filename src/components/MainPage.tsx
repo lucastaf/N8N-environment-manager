@@ -7,8 +7,8 @@ import EnviromentsCredentialsTab from "./pages/EnvironmentCredentials";
 export default function MainPage() {
   return (
     <div>
-      <Tabs>
-        <TabsList>
+      <Tabs defaultValue="workflows">
+        <TabsList className="gap-2 pt-2">
           <TabsTrigger value="workflows">Workflows</TabsTrigger>
           <TabsTrigger value="enviroments">Enviroments</TabsTrigger>
           <TabsTrigger value="credentials">Credentials</TabsTrigger>
