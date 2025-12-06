@@ -1,7 +1,8 @@
-import { create, mkdir, readDir, readFile } from "@tauri-apps/plugin-fs";
+import { create, mkdir, readDir, readFile, writeFile } from "@tauri-apps/plugin-fs";
 import { DatabaseManager } from "./database/databaseManager";
 import toast from "react-hot-toast";
 import { CredentialNotFoundError, WorkFlowReplacer } from "./workflowReplacer";
+import { save } from "@tauri-apps/plugin-dialog";
 
 export type N8NFindedCredential =
     {
@@ -50,7 +51,30 @@ export class WorkflowManager {
             const decodedContent = new TextDecoder().decode(content);
             const jsonBody = JSON.parse(decodedContent);
             const newWorkflow = await this.workFlowReplacer.replaceGenericToCredentials(jsonBody, environmentId);
-            console.log(newWorkflow);
+            const newWorkFlowString = JSON.stringify(newWorkflow, undefined, 2);
+
+            const encoder = new TextEncoder();
+            const encodedWorkFlowString = encoder.encode(newWorkFlowString);
+            const path = await save({
+                title: "Save Workflow",
+                defaultPath: newWorkflow.name,
+                filters: [
+                    {
+                        name: newWorkflow.name,
+                        extensions: ["json"]
+                    }
+                ]
+            })
+
+            if (!path) {
+                toast.error("Download canceled")
+                return;
+            }
+
+            await writeFile(path, encodedWorkFlowString);
+
+            toast.success("Workflow downloaded");
+
         } catch (e) {
             toast.error("Error when downloading file");
             console.error(e);
