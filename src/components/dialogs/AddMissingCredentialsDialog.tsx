@@ -36,11 +36,15 @@ export default function AddMissingCredentialsDialog(props: {
     >
   >({});
 
-  const handleAddCredentials = useCallback(() => {
-    Object.entries(selectedValues).forEach(async ([id, selectedValue]) => {
+  const handleAddCredentials = useCallback(async () => {
+    const selectedValuesEntries = Object.entries(selectedValues);
+    for (const entry of selectedValuesEntries) {
+      const [id, selectedValue] = entry;
+
       if (selectedValue.id_credential && selectedValue.id_environment) {
         const credential = credentials?.find((item) => item.id == id);
         if (!credential) return;
+
         await manager?.environmentCredentialMangaer.create({
           id: id,
           id_credential: selectedValue.id_credential,
@@ -49,9 +53,10 @@ export default function AddMissingCredentialsDialog(props: {
           value: credential?.value,
         });
       }
+
       setOpen(false);
       workFlowManager?.retryWorkFlowAdd();
-    });
+    }
   }, [database, selectedValues]);
 
   const getEnvironmentName = useCallback(
@@ -92,7 +97,6 @@ export default function AddMissingCredentialsDialog(props: {
                     value={selectedValues[credential.id]?.id_environment}
                     onValueChange={(selectedValue) => {
                       setSelectedValues((prev) => {
-                        console.log(selectedValue);
                         const prevSelection = prev[credential.id] ?? {};
                         prevSelection.id_environment = selectedValue;
                         prev[credential.id] = prevSelection;

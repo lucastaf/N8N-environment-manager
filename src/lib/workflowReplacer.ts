@@ -65,8 +65,8 @@ export class WorkFlowReplacer {
     private getUniqueCredentials(json: any) {
         //Find Credentials
         const credentials: N8NCredential[] = json.nodes
-            .map((item: any) => item.credentials)
-            .filter((item: any) => item !== undefined);
+            .filter((node: any) => node.credentials !== undefined)
+            .map((node: any) => node.credentials);
 
         const findedCredentials: N8NFindedCredential[] = [];
         credentials.forEach((item: N8NCredential) => {
