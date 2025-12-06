@@ -1,16 +1,26 @@
 import { Low } from "lowdb";
-import { credentialsDatabaseType, onDatabaseUpdate } from "../databaseType";
+import { credentialsDatabaseType, environments, onDatabaseUpdate } from "../databaseType";
+import { EntityManager } from "./EntityManagerInterface";
 
-export class EnviromentsManager {
+export class EnviromentsManager implements EntityManager<environments> {
     public constructor(private db: Low<credentialsDatabaseType>, private onUpdate: onDatabaseUpdate) { }
+    getById(id: string): environments | undefined {
+        return this.db.data.environments.find(item => item.id == id);
+    }
+    async getList(): Promise<environments[]> {
+        await this.db.read();
+        return this.db.data.environments;
+    }
 
     public async create(enviromentName: string) {
         await this.db.read();
-        await this.db?.update(({ environments: enviroments }) => enviroments.push({
+        const newData = {
             id: crypto.randomUUID(),
             name: enviromentName
-        }))
+        }
+        await this.db?.update(({ environments: enviroments }) => enviroments.push(newData))
         await this.onUpdate(this.db.data);
+        return newData;
     }
 
     public async deleteById(enviromentId: string) {

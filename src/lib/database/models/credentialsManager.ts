@@ -1,16 +1,30 @@
 import { Low } from "lowdb";
-import { credentialsDatabaseType, onDatabaseUpdate } from "../databaseType";
+import { credentials, credentialsDatabaseType, onDatabaseUpdate } from "../databaseType";
+import { EntityManager } from "./EntityManagerInterface";
 
-export class CredentialsManager {
-    public constructor(private db: Low<credentialsDatabaseType>, private onUpdate: onDatabaseUpdate) { }
+export class CredentialsManager implements EntityManager<credentials> {
+    constructor(protected db: Low<credentialsDatabaseType>, protected onUpdate: onDatabaseUpdate) {
+
+    }
+
+    getById(id: string): credentials | undefined {
+        return this.db.data.credentials.find(item => item.id == id);
+    }
+    async getList(): Promise<credentials[]> {
+        await this.db.read();
+        return this.db.data.credentials;
+    }
+
 
     public async create(credentialName: string) {
-        await this.db.read();
-        await this.db?.update(({ credentials }) => credentials.push({
+        const newItem: credentials = {
             id: crypto.randomUUID(),
             name: credentialName
-        }))
+        }
+        await this.db.read();
+        await this.db?.update(({ credentials }) => credentials.push(newItem))
         await this.onUpdate(this.db.data);
+        return newItem
     }
 
     public async deleteById(credentialId: string) {

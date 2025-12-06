@@ -1,5 +1,6 @@
 import { Low } from "lowdb";
 import { credentials, credentialsDatabaseType, environments, environments_credentials, onDatabaseUpdate } from "../databaseType";
+import { EntityManager } from "./EntityManagerInterface";
 
 export type mergedEnvironmentsCredentials = Array<
     environments_credentials & {
@@ -7,14 +8,25 @@ export type mergedEnvironmentsCredentials = Array<
         environment: environments
     }>
 
-export class EnvironmentCredentialManager {
+export class EnvironmentCredentialManager implements EntityManager<environments_credentials> {
     public constructor(private db: Low<credentialsDatabaseType>, private onUpdate: onDatabaseUpdate) {
     }
+
+    public getById(id: string) {
+        return this.db.data.environments_credentials.find(item => item.id == id);
+    }
+    public async getList() {
+        await this.db.read();
+        return this.db.data.environments_credentials;
+    }
+
+
 
     public async create(data: environments_credentials) {
         await this.db.read();
         await this.db.update(({ environments_credentials }) => environments_credentials.push(data))
         await this.onUpdate(this.db.data);
+        return data;
     }
 
     public async deleteById(credentialId: string) {
@@ -30,14 +42,7 @@ export class EnvironmentCredentialManager {
         await this.onUpdate(this.db.data);
     }
 
-    public async getList() {
-        await this.db.read();
-        return this.db.data.environments_credentials;
-    }
 
-    public getById(id: string) {
-        return this.db.data.environments_credentials.find(item => item.id == id);
-    }
 
     public async getMergedList() {
         await this.db.read();
